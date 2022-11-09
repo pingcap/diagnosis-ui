@@ -1,0 +1,8 @@
+{
+  "name": "storybook",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "@diag-ui/chart": "*"
+  }
+}
