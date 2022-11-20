@@ -1,4 +1,4 @@
-import { createContext, useContext, useRef, useState } from 'react'
+import React, { createContext, useContext, useRef, useState } from 'react'
 import ReactECharts from 'echarts-for-react'
 
 interface ChartRefProps {

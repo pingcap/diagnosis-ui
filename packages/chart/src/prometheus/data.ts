@@ -1,5 +1,5 @@
 import { DEFAULT_MIN_INTERVAL_SEC } from '.'
-import { DataPoint } from '../types'
+import { DataPoint } from '../chart/types'
 import { TriggerParams } from './prom_data_accessor'
 import { isMatrixData, MatrixOrVectorResult } from './types'
 

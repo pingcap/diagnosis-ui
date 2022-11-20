@@ -13,7 +13,7 @@ import {
   DataGroup,
   DataSeries,
   useDataAccessor,
-} from '../data_accessor'
+} from '../chart/data_accessor'
 import {
   Query,
   QueryGroup,
@@ -26,7 +26,7 @@ import {
   PromMatrixData,
 } from './types'
 import { processRawData } from './data'
-import { DataPoint } from '../types'
+import { DataPoint } from '../chart/types'
 import { DEFAULT_LIGHT_COLOR } from '../utils/theme/colors'
 
 export interface TriggerParams {
@@ -182,6 +182,7 @@ const transformToEChartsOption = (
     prev[id] = {
       tooltip: {
         confine: true,
+        extraCssText: 'width:auto; white-space:pre-wrap;',
         order: 'valueDesc',
         trigger: TooltipTriggerStr[tooltipTriggerBit] as
           | 'item'
@@ -203,6 +204,11 @@ const transformToEChartsOption = (
           show: true,
           snap: true,
           triggerTooltip: false,
+        },
+        axisLabel: {
+          formatter: {
+            day: '{yyyy}-{MM}-{dd}',
+          },
         },
       },
       yAxis: {

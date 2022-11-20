@@ -1,5 +1,5 @@
 import { createContext, useContext, useState } from 'react'
-import { Query } from './prometheus/query_register'
+import { Query } from '../prometheus/query_register'
 import { EChartsOption } from 'echarts'
 import { DataPoint } from './types'
 

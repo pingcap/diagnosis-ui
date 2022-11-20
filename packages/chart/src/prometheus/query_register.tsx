@@ -1,5 +1,5 @@
-import { createContext, useContext, useEffect } from 'react'
-import { useChartRef } from '../chart_ref'
+import React, { createContext, useContext, useEffect } from 'react'
+import { useChartRef } from '../chart/chart_ref'
 
 export interface Query {
   promql: string

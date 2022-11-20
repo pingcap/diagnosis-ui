@@ -1,4 +1,9 @@
-import React from 'react'
+import React, {
+  forwardRef,
+  useCallback,
+  useImperativeHandle,
+  useMemo,
+} from 'react'
 import ReactECharts from 'echarts-for-react'
 import { EChartsOption, SeriesOption } from 'echarts'
 
@@ -13,32 +18,52 @@ export interface TimeSeriesChartProps<P = any, TP = any> {
   nullValue?: TransformNullValue
   renderError?: React.ReactNode
   renderLoading?: React.ReactNode
+  children?: React.ReactNode
+  style?: React.CSSProperties
 }
 
-export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
-  onEvents,
-  modifyOption = o => o,
-  nullValue = TransformNullValue.NULL,
-  children,
-}) => {
+export const TimeSeriesChart = forwardRef<
+  ReactECharts | null,
+  TimeSeriesChartProps
+>(function TimeSeriesChart(
+  {
+    onEvents,
+    modifyOption = (o: EChartsOption) => o,
+    nullValue = TransformNullValue.NULL,
+    children,
+    style,
+  },
+  forwardRef
+) {
   const { chartId, chartRef } = useChartRefParams()
   const [dataGroup] = useDataAccessor()
-  const options = modifyOption(dataGroup?.[chartId] || {})
+  const data = dataGroup?.[chartId]
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const modifyCallback = useCallback(modifyOption, [])
+  const options = useMemo(() => {
+    const opts = modifyCallback(data || {})
+    opts.series = nullValueTransform(opts.series as SeriesOption[], nullValue)
+    return opts
+  }, [data, nullValue, modifyCallback])
 
-  options.series = nullValueTransform(
-    options.series as SeriesOption[],
-    nullValue
-  )
+  useImperativeHandle(forwardRef, () => chartRef.current as ReactECharts, [
+    chartRef,
+  ])
 
   console.log(options)
 
   return (
     <ChartRef identifier={chartId} chartRef={chartRef}>
-      <ReactECharts ref={chartRef} onEvents={onEvents} option={options} />
+      <ReactECharts
+        ref={chartRef as any}
+        onEvents={onEvents as any}
+        option={options}
+        style={style}
+      />
       {children}
     </ChartRef>
   )
-}
+})
 
 const nullValueTransform = (
   series: SeriesOption[],
@@ -50,5 +75,6 @@ const nullValueTransform = (
       d[0],
       !!d[1] ? d[1] : nullValue === TransformNullValue.NULL ? null : 0,
     ]),
+    animation: false,
   })) as SeriesOption[]
 }
