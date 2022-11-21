@@ -1,8 +1,8 @@
-import { DEFAULT_MIN_INTERVAL_SEC } from '.'
 import { DataPoint } from '../chart/types'
 import { TriggerParams } from './prom_data_accessor'
 import { isMatrixData, MatrixOrVectorResult } from './types'
 
+export const DEFAULT_MIN_INTERVAL_SEC = 30
 const POSITIVE_INFINITY_SAMPLE_VALUE = '+Inf'
 const NEGATIVE_INFINITY_SAMPLE_VALUE = '-Inf'
 

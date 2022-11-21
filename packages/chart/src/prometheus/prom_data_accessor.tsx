@@ -1,17 +1,16 @@
 import React, { useEffect, useState } from 'react'
 import format from 'string-template'
 
-import { DEFAULT_MIN_INTERVAL_SEC } from './index'
 import {
   DataAccessorContext,
   DataContext,
   ProcessedData,
   ResultGroup,
   useDataAccessor,
-} from '../chart/data_accessor'
+} from '../data_accessor'
 import { QueryRegister, useQueryRegister } from './query_register'
 import { PromDataErrorResponse, PromDataSuccessResponse } from './types'
-import { processRawData } from './data'
+import { processRawData, DEFAULT_MIN_INTERVAL_SEC } from './data'
 
 export interface TriggerParams {
   start_time: number
@@ -81,7 +80,7 @@ const Fetcher: React.FC<PromDataAccessor> = ({
             if (resp.status !== 'success') {
               return null
             }
-            // TODO: support PromMatrixData only
+            // TODO: support other data types?
             if (
               Array.isArray(resp.data) ||
               resp.data?.resultType !== 'matrix'

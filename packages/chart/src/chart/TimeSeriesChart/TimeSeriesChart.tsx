@@ -7,12 +7,12 @@ import React, {
   useMemo,
   useState,
 } from 'react'
-import { TriggerParams } from '../prometheus/prom_data_accessor'
+import { TriggerParams } from '../../prometheus/prom_data_accessor'
 
-import { ChartRef, useChartRefParams } from './chart_ref'
-import { Result, useDataAccessor } from './data_accessor'
-import { DEFAULT_MIX_CONFIG } from './default'
-import { GetElementType, TransformNullValue } from './types'
+import { ChartRef, useChartRefParams } from '../chart_ref'
+import { Result, useDataAccessor } from '../../data_accessor'
+import { GetElementType, TransformNullValue } from '../types'
+import { DEFAULT_MIX_CONFIG } from './default_config'
 
 type Plot = GetElementType<Required<MixConfig>['plots']>
 
@@ -23,8 +23,10 @@ export interface TimeSeriesChartProps<P = any, TP = any> {
   nullValue?: TransformNullValue
   renderError?: React.ReactNode
   renderLoading?: React.ReactNode
-  children?: React.ReactNode
+  width?: number
   height?: number
+  autoFit?: boolean
+  children?: React.ReactNode
 }
 
 export const TimeSeriesChart = forwardRef<
@@ -34,9 +36,14 @@ export const TimeSeriesChart = forwardRef<
   {
     onEvents,
     modifyConfig = (cfg: MixConfig) => cfg,
+    timezone,
     nullValue = TransformNullValue.NULL,
-    children,
+    renderError,
+    renderLoading,
+    width,
     height,
+    autoFit = true,
+    children,
   },
   forwardRef
 ) {
@@ -51,7 +58,9 @@ export const TimeSeriesChart = forwardRef<
     () =>
       modifyConfig({
         ...DEFAULT_MIX_CONFIG,
+        width,
         height,
+        autoFit,
         plots,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -122,13 +131,20 @@ async function dataToPlots(
             meta: {
               timestamp: {
                 sync: true,
+                alias: 'Time',
                 type: 'time',
                 min: triggerParams.start_time * 1000,
                 max: triggerParams.end_time * 1000,
+                mask: 'YYYY-MM-DD HH:mm:ss',
               },
               data: {
+                sync: true,
                 nice: true,
+                alias: 'Value',
                 formatter,
+              },
+              name: {
+                alias: 'Name',
               },
             },
             color: d.color,
