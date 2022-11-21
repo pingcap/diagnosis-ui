@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useRef, useState } from 'react'
-import ReactECharts from 'echarts-for-react'
+import { Mix } from '@ant-design/plots'
 
 interface ChartRefProps {
   identifier: string
-  chartRef: React.RefObject<ReactECharts>
+  chartRef: React.RefObject<typeof Mix>
 }
 
 const ChartRefContext = createContext<ChartRefProps>(null as any)
@@ -24,7 +24,7 @@ const SENTINEL = {}
 let incrementalId = 0
 
 export const useChartRefParams = () => {
-  const chartRef = useRef<ReactECharts>(null)
+  const chartRef = useRef<typeof Mix>(null)
   const chartId = useRef(SENTINEL)
   if (chartId.current === SENTINEL) {
     chartId.current = ++incrementalId

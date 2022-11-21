@@ -1,10 +1,16 @@
 import { Mix, MixConfig } from '@ant-design/plots'
 import { getValueFormat } from '@baurine/grafana-value-formats'
-import React, { forwardRef, useEffect, useMemo, useState } from 'react'
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useState,
+} from 'react'
 import { TriggerParams } from '../prometheus/prom_data_accessor'
 
 import { ChartRef, useChartRefParams } from './chart_ref'
-import { ProcessedData, Result, useDataAccessor } from './data_accessor'
+import { Result, useDataAccessor } from './data_accessor'
 import { TransformNullValue } from './types'
 
 export interface TimeSeriesChartProps<P = any, TP = any> {
@@ -37,9 +43,14 @@ export const TimeSeriesChart = forwardRef<
   const result = results?.[chartId]
   const [plots, setPlots] = useState<MixConfig['plots']>([])
   const config: MixConfig = useMemo(
-    () => ({ ...DEFAULT_MIX_CONFIG, plots }),
+    () => modifyConfig({ ...DEFAULT_MIX_CONFIG, plots }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [plots]
   )
+
+  useImperativeHandle(forwardRef, () => chartRef.current as typeof Mix, [
+    chartRef,
+  ])
 
   useEffect(() => {
     async function fetchData() {
@@ -62,7 +73,8 @@ export const TimeSeriesChart = forwardRef<
 
   return (
     <ChartRef identifier={chartId} chartRef={chartRef}>
-      {plots!.length && <Mix {...config} />}
+      {/* FIXME: chartRef does not exist at first */}
+      {plots!.length && <Mix {...config} ref={chartRef} />}
       {children}
     </ChartRef>
   )
