@@ -59,7 +59,7 @@ export const TimeSeriesChart = forwardRef<
       }
 
       const chartData = await Promise.all(
-        result.map(rst => processPlots(rst, triggerParams!))
+        result.map(rst => processPlots(rst, triggerParams!, nullValue))
       )
 
       console.log(chartData)
@@ -69,7 +69,7 @@ export const TimeSeriesChart = forwardRef<
     }
 
     fetchData()
-  }, [result, triggerParams])
+  }, [result, triggerParams, nullValue])
 
   return (
     <ChartRef identifier={chartId} chartRef={chartRef}>
@@ -82,7 +82,8 @@ export const TimeSeriesChart = forwardRef<
 
 async function processPlots(
   result: Result,
-  triggerParams: TriggerParams
+  triggerParams: TriggerParams,
+  nullValue: TransformNullValue
 ): Promise<MixConfig['plots']> {
   const { promise, queryGroup } = result
   const { position, unit } = queryGroup
@@ -128,7 +129,11 @@ async function processPlots(
       plots[d.type].options.data.push(
         ...d.data.map(_d => ({
           timestamp: _d[0],
-          data: _d[1],
+          data: !!_d[1]
+            ? _d[1]
+            : nullValue === TransformNullValue.NULL
+            ? null
+            : 0,
           name: d.name,
         }))
       )

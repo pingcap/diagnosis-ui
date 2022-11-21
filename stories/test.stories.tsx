@@ -34,7 +34,7 @@ export const Test = ({ cteGap, ...args }) => {
               promql: 'test',
               name: '{sql_type}',
               color: 'test',
-              type: 'line',
+              type: 'scatter',
             },
           ]}
           unit="s"
