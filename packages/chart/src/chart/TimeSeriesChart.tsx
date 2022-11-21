@@ -12,7 +12,9 @@ import { TriggerParams } from '../prometheus/prom_data_accessor'
 import { ChartRef, useChartRefParams } from './chart_ref'
 import { Result, useDataAccessor } from './data_accessor'
 import { DEFAULT_MIX_CONFIG } from './default'
-import { TransformNullValue } from './types'
+import { GetElementType, TransformNullValue } from './types'
+
+type Plot = GetElementType<Required<MixConfig>['plots']>
 
 export interface TimeSeriesChartProps<P = any, TP = any> {
   onEvents?: Record<string, Function>
@@ -42,8 +44,8 @@ export const TimeSeriesChart = forwardRef<
   const [dataContext] = useDataAccessor()
   const { results, triggerParams } = dataContext || {}
   const result = results?.[chartId]
-  const [plots, setPlots] = useState<MixConfig['plots']>(
-    DEFAULT_MIX_CONFIG.plots
+  const [plots, setPlots] = useState<Required<MixConfig>['plots']>(
+    DEFAULT_MIX_CONFIG.plots!
   )
   const config: MixConfig = useMemo(
     () => modifyConfig({ ...DEFAULT_MIX_CONFIG, plots }),
@@ -90,7 +92,7 @@ async function processPlots(
   const { promise, queryGroup } = result
   const { position, unit } = queryGroup
   const dataList = await Promise.all(promise)
-  const plots: { [type: string]: any } = {}
+  const plots: { [type: string]: Plot } = {}
 
   const formatter = (v: any) => {
     let _unit = unit || 'none'
@@ -125,10 +127,10 @@ async function processPlots(
               },
             },
           },
-        } as any
+        } as Plot
       }
 
-      plots[d.type].options.data.push(
+      plots[d.type].options.data!.push(
         ...d.data.map(_d => ({
           timestamp: _d[0],
           data: !!_d[1]
