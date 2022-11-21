@@ -1,13 +1,15 @@
 import { createContext, useContext, useState } from 'react'
+import { ColorAttr } from '@antv/g2plot'
+
 import { TriggerParams } from '../prometheus/prom_data_accessor'
-import { ChartType, Query, QueryGroup } from '../prometheus/query_register'
+import { ChartType, QueryGroup } from '../prometheus/query_register'
 import { DataPoint } from './types'
 
 export type ProcessedData = {
   data: DataPoint[]
   name: string
-  color: string
   type: ChartType
+  color?: ColorAttr
 }[]
 
 export type Result = {

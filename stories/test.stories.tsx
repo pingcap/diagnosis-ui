@@ -27,13 +27,17 @@ export const Test = ({ cteGap, ...args }) => {
         refreshChart()
       }}
     >
-      <TimeSeriesChart>
+      <TimeSeriesChart
+        modifyConfig={c => {
+          console.log(c)
+          return c
+        }}
+      >
         <PromQueryGroup
           queries={[
             {
               promql: 'test',
               name: '{sql_type}',
-              color: 'test',
               type: 'scatter',
             },
           ]}

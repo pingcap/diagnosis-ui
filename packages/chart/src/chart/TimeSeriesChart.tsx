@@ -24,7 +24,7 @@ export interface TimeSeriesChartProps<P = any, TP = any> {
   renderError?: React.ReactNode
   renderLoading?: React.ReactNode
   children?: React.ReactNode
-  style?: React.CSSProperties
+  height?: number
 }
 
 export const TimeSeriesChart = forwardRef<
@@ -36,7 +36,7 @@ export const TimeSeriesChart = forwardRef<
     modifyConfig = (cfg: MixConfig) => cfg,
     nullValue = TransformNullValue.NULL,
     children,
-    style,
+    height,
   },
   forwardRef
 ) {
@@ -48,7 +48,12 @@ export const TimeSeriesChart = forwardRef<
     DEFAULT_MIX_CONFIG.plots!
   )
   const config: MixConfig = useMemo(
-    () => modifyConfig({ ...DEFAULT_MIX_CONFIG, plots }),
+    () =>
+      modifyConfig({
+        ...DEFAULT_MIX_CONFIG,
+        height,
+        plots,
+      }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [plots]
   )
@@ -64,7 +69,7 @@ export const TimeSeriesChart = forwardRef<
       }
 
       const chartData = await Promise.all(
-        result.map(rst => processPlots(rst, triggerParams!, nullValue))
+        result.map(rst => dataToPlots(rst, triggerParams!, nullValue))
       )
 
       console.log(chartData)
@@ -84,7 +89,7 @@ export const TimeSeriesChart = forwardRef<
   )
 })
 
-async function processPlots(
+async function dataToPlots(
   result: Result,
   triggerParams: TriggerParams,
   nullValue: TransformNullValue
@@ -126,6 +131,7 @@ async function processPlots(
                 formatter,
               },
             },
+            color: d.color,
           },
         } as Plot
       }
