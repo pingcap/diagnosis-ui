@@ -5,7 +5,7 @@ export interface Query {
   promql: string
   name: string
   color: string
-  type: 'line' | 'bar' | 'scatter'
+  type: 'line' | 'bar' | 'column' | 'area' | 'scatter'
 }
 
 export interface QueryGroup {

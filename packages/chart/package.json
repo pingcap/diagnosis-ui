@@ -13,6 +13,7 @@
     "tsconfig": "*"
   },
   "dependencies": {
+    "@ant-design/charts": "^1.4.2",
     "@baurine/grafana-value-formats": "^1.0.5",
     "dayjs": "^1.11.6",
     "echarts": "^5.4.0",
