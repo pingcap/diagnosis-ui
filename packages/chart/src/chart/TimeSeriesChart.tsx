@@ -11,6 +11,7 @@ import { TriggerParams } from '../prometheus/prom_data_accessor'
 
 import { ChartRef, useChartRefParams } from './chart_ref'
 import { Result, useDataAccessor } from './data_accessor'
+import { DEFAULT_MIX_CONFIG } from './default'
 import { TransformNullValue } from './types'
 
 export interface TimeSeriesChartProps<P = any, TP = any> {
@@ -41,7 +42,9 @@ export const TimeSeriesChart = forwardRef<
   const [dataContext] = useDataAccessor()
   const { results, triggerParams } = dataContext || {}
   const result = results?.[chartId]
-  const [plots, setPlots] = useState<MixConfig['plots']>([])
+  const [plots, setPlots] = useState<MixConfig['plots']>(
+    DEFAULT_MIX_CONFIG.plots
+  )
   const config: MixConfig = useMemo(
     () => modifyConfig({ ...DEFAULT_MIX_CONFIG, plots }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -73,8 +76,7 @@ export const TimeSeriesChart = forwardRef<
 
   return (
     <ChartRef identifier={chartId} chartRef={chartRef}>
-      {/* FIXME: chartRef does not exist at first */}
-      {plots!.length && <Mix {...config} ref={chartRef} />}
+      <Mix {...config} ref={chartRef} />
       {children}
     </ChartRef>
   )
@@ -141,17 +143,4 @@ async function processPlots(
   })
 
   return Object.values(plots)
-}
-
-const DEFAULT_MIX_CONFIG: MixConfig = {
-  tooltip: {
-    shared: true,
-  },
-  legend: {
-    flipPage: true,
-    maxRow: 2,
-    layout: 'horizontal',
-    position: 'bottom',
-  },
-  syncViewPadding: true,
 }

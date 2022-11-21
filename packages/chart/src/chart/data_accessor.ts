@@ -1,9 +1,14 @@
 import { createContext, useContext, useState } from 'react'
 import { TriggerParams } from '../prometheus/prom_data_accessor'
-import { Query, QueryGroup } from '../prometheus/query_register'
+import { ChartType, Query, QueryGroup } from '../prometheus/query_register'
 import { DataPoint } from './types'
 
-export type ProcessedData = ({ data: DataPoint[] } & Query)[]
+export type ProcessedData = {
+  data: DataPoint[]
+  name: string
+  color: string
+  type: ChartType
+}[]
 
 export type Result = {
   queryGroup: QueryGroup

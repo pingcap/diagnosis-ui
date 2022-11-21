@@ -1,11 +1,13 @@
 import React, { createContext, useContext, useEffect } from 'react'
 import { useChartRef } from '../chart/chart_ref'
 
+export type ChartType = 'line' | 'bar' | 'column' | 'area' | 'scatter'
+
 export interface Query {
   promql: string
   name: string
   color: string
-  type: 'line' | 'bar' | 'column' | 'area' | 'scatter'
+  type: ChartType
 }
 
 export interface QueryGroup {

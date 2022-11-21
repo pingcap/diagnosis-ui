@@ -16,8 +16,6 @@
     "@ant-design/charts": "^1.4.2",
     "@baurine/grafana-value-formats": "^1.0.5",
     "dayjs": "^1.11.6",
-    "echarts": "^5.4.0",
-    "echarts-for-react": "^3.0.2",
     "string-template": "^1.0.0"
   }
 }

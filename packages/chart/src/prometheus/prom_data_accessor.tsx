@@ -75,22 +75,27 @@ const Fetcher: React.FC<PromDataAccessor> = ({
       }
 
       // Multiple queries in a query group.
-      const promise = queryGroup.queries.map(q =>
-        fetch(q.promql, triggerParams).then(resp => {
-          if (resp.status !== 'success') {
-            return null
-          }
-          // TODO: support PromMatrixData only
-          if (Array.isArray(resp.data) || resp.data?.resultType !== 'matrix') {
-            return null
-          }
-          const result = resp.data.result
-          return result.map(r => ({
-            ...q,
-            name: format(q.name, r.metric),
-            data: processRawData(r, triggerParams),
-          })) as ProcessedData
-        })
+      const promise: Promise<ProcessedData | null>[] = queryGroup.queries.map(
+        q =>
+          fetch(q.promql, triggerParams).then(resp => {
+            if (resp.status !== 'success') {
+              return null
+            }
+            // TODO: support PromMatrixData only
+            if (
+              Array.isArray(resp.data) ||
+              resp.data?.resultType !== 'matrix'
+            ) {
+              return null
+            }
+            const result = resp.data.result
+            return result.map(r => ({
+              color: q.color,
+              type: q.type,
+              name: format(q.name, r.metric),
+              data: processRawData(r, triggerParams),
+            }))
+          })
       )
 
       // Multiple query groups in a chart.
