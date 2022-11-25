@@ -97,15 +97,15 @@ export const TimeSeriesChart = forwardRef<
 
     // event of the other charts send to current chart
     const unsubscribe = syncTooltip.subscribe(e => {
-      console.log(e)
       if (e.chartId === chartId) {
         return
       }
 
       if (e.type === 'move') {
-        chartRef
-          .current!.getChart()
-          .chart.showTooltip({ x: e.evt.data?.x, y: e.evt.data?.y })
+        chartRef.current!.getChart().chart.showTooltip({
+          x: e.evt.x || e.evt.data?.x,
+          y: e.evt.y || e.evt.data?.y,
+        })
         return
       }
 
@@ -116,9 +116,9 @@ export const TimeSeriesChart = forwardRef<
     })
 
     // event of the current chart to other charts
-    chartRef.current!.getChart().on('element:mousemove', (evt: PlotEvent) => {
-      syncTooltip.emit({ type: 'move', chartId, evt })
-    })
+    // chartRef.current!.getChart().on('element:mousemove', (evt: PlotEvent) => {
+    //   syncTooltip.emit({ type: 'move', chartId, evt })
+    // })
     // chartRef.current!.getChart().on('tooltip:hide', (evt: PlotEvent) => {
     //   syncTooltip.emit({ type: 'hide', chartId, evt })
     // })
