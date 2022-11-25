@@ -7,6 +7,7 @@ import {
   Trigger,
 } from '@diag-ui/chart'
 import testData from './data.json'
+import { SyncTooltip } from '@diag-ui/chart/src/chart/sync_tooltip'
 
 export default {
   title: 'Example/Test',
@@ -27,28 +28,47 @@ export const Test = ({ cteGap, ...args }) => {
         refreshChart()
       }}
     >
-      <TimeSeriesChart
-        modifyConfig={c => {
-          console.log(c)
-          return c
-        }}
-      >
-        <PromQueryGroup
-          queries={[
-            {
-              promql: 'test',
-              name: '{sql_type}',
-              type: 'scatter',
-            },
-            // {
-            //   promql: 'test2',
-            //   name: '{sql_type}',
-            //   type: 'line',
-            // },
-          ]}
-          unit="s"
-        />
-      </TimeSeriesChart>
+      <SyncTooltip>
+        <TimeSeriesChart
+          modifyConfig={c => {
+            console.log(c)
+            return c
+          }}
+        >
+          <PromQueryGroup
+            queries={[
+              {
+                promql: 'test',
+                name: '{sql_type}',
+                type: 'scatter',
+              },
+              // {
+              //   promql: 'test2',
+              //   name: '{sql_type}',
+              //   type: 'line',
+              // },
+            ]}
+            unit="s"
+          />
+        </TimeSeriesChart>{' '}
+        <TimeSeriesChart
+          modifyConfig={c => {
+            console.log(c)
+            return c
+          }}
+        >
+          <PromQueryGroup
+            queries={[
+              {
+                promql: 'test2',
+                name: '{sql_type}',
+                type: 'line',
+              },
+            ]}
+            unit="s"
+          />
+        </TimeSeriesChart>
+      </SyncTooltip>
     </PromDataAccessor>
   )
 }

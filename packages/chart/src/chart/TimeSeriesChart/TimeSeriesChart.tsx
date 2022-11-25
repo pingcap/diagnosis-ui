@@ -1,4 +1,4 @@
-import { Mix, MixConfig } from '@ant-design/plots'
+import { Mix, MixConfig, PlotEvent } from '@ant-design/plots'
 import { getValueFormat } from '@baurine/grafana-value-formats'
 import React, {
   forwardRef,
@@ -7,14 +7,15 @@ import React, {
   useMemo,
   useState,
 } from 'react'
-import { TriggerParams } from '../../prometheus/prom_data_accessor'
 
+import { TriggerParams } from '../../prometheus/prom_data_accessor'
 import { ChartRef, useChartRefParams } from '../chart_ref'
 import { Result, useDataAccessor } from '../../data_accessor'
 import { GetElementType, TransformNullValue } from '../types'
 import { DEFAULT_MIX_CONFIG } from './default_config'
+import { useSyncTooltip } from '../sync_tooltip'
 
-type Plot = GetElementType<Required<MixConfig>['plots']>
+type PlotConfig = GetElementType<Required<MixConfig>['plots']>
 
 export interface TimeSeriesChartProps<P = any, TP = any> {
   onEvents?: Record<string, Function>
@@ -67,9 +68,7 @@ export const TimeSeriesChart = forwardRef<
     [plots]
   )
 
-  useImperativeHandle(forwardRef, () => chartRef.current as typeof Mix, [
-    chartRef,
-  ])
+  useImperativeHandle(forwardRef, () => chartRef.current as any, [chartRef])
 
   useEffect(() => {
     async function fetchData() {
@@ -81,7 +80,6 @@ export const TimeSeriesChart = forwardRef<
         result.map(rst => dataToPlots(rst, triggerParams!, nullValue))
       )
 
-      console.log(chartData)
       const plots: MixConfig['plots'] = []
       chartData.forEach(cd => plots.push(...cd!))
       setPlots(plots)
@@ -90,9 +88,53 @@ export const TimeSeriesChart = forwardRef<
     fetchData()
   }, [result, triggerParams, nullValue])
 
+  const syncTooltip = useSyncTooltip()
+
+  useEffect(() => {
+    if (!syncTooltip) {
+      return
+    }
+
+    // event of the other charts send to current chart
+    const unsubscribe = syncTooltip.subscribe(e => {
+      console.log(e)
+      if (e.chartId === chartId) {
+        return
+      }
+
+      if (e.type === 'move') {
+        chartRef
+          .current!.getChart()
+          .chart.showTooltip({ x: e.evt.data?.x, y: e.evt.data?.y })
+        return
+      }
+
+      // if (e.type === 'hide') {
+      //   chartRef.current!.getChart().chart.hideTooltip()
+      //   return
+      // }
+    })
+
+    // event of the current chart to other charts
+    chartRef.current!.getChart().on('element:mousemove', (evt: PlotEvent) => {
+      syncTooltip.emit({ type: 'move', chartId, evt })
+    })
+    // chartRef.current!.getChart().on('tooltip:hide', (evt: PlotEvent) => {
+    //   syncTooltip.emit({ type: 'hide', chartId, evt })
+    // })
+
+    return () => {
+      if (!syncTooltip) {
+        return
+      }
+      unsubscribe()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   return (
     <ChartRef identifier={chartId} chartRef={chartRef}>
-      <Mix {...config} ref={chartRef} />
+      <Mix {...config} ref={chartRef} onReady={() => {}} />
       {children}
     </ChartRef>
   )
@@ -106,7 +148,7 @@ async function dataToPlots(
   const { promise, queryGroup } = result
   const { position, unit } = queryGroup
   const dataList = await Promise.all(promise)
-  const plots: { [type: string]: Plot } = {}
+  const plots: { [type: string]: PlotConfig } = {}
 
   const formatter = (v: any) => {
     let _unit = unit || 'none'
@@ -149,7 +191,7 @@ async function dataToPlots(
             },
             color: d.color,
           },
-        } as Plot
+        } as PlotConfig
       }
 
       plots[d.type].options.data!.push(
