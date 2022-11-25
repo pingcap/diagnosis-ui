@@ -9,7 +9,7 @@ import React, {
 } from 'react'
 
 import { TriggerParams } from '../../prometheus/prom_data_accessor'
-import { ChartRef, useChartRefParams } from '../chart_ref'
+import { Chart, ChartRef, useChartRefParams } from '../chart_ref'
 import { Result, useDataAccessor } from '../../data_accessor'
 import { GetElementType, TransformNullValue } from '../types'
 import { DEFAULT_MIX_CONFIG } from './default_config'
@@ -30,115 +30,114 @@ export interface TimeSeriesChartProps<P = any, TP = any> {
   children?: React.ReactNode
 }
 
-export const TimeSeriesChart = forwardRef<
-  typeof Mix | null,
-  TimeSeriesChartProps
->(function TimeSeriesChart(
-  {
-    onEvents,
-    modifyConfig = (cfg: MixConfig) => cfg,
-    timezone,
-    nullValue = TransformNullValue.NULL,
-    renderError,
-    renderLoading,
-    width,
-    height,
-    autoFit = true,
-    children,
-  },
-  forwardRef
-) {
-  const { chartId, chartRef } = useChartRefParams()
-  const [dataContext] = useDataAccessor()
-  const { results, triggerParams } = dataContext || {}
-  const result = results?.[chartId]
-  const [plots, setPlots] = useState<Required<MixConfig>['plots']>(
-    DEFAULT_MIX_CONFIG.plots!
-  )
-  const config: MixConfig = useMemo(
-    () =>
-      modifyConfig({
-        ...DEFAULT_MIX_CONFIG,
-        width,
-        height,
-        autoFit,
-        plots,
-      }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [plots]
-  )
+export const TimeSeriesChart = forwardRef<Chart, TimeSeriesChartProps>(
+  function TimeSeriesChart(
+    {
+      onEvents,
+      modifyConfig = (cfg: MixConfig) => cfg,
+      timezone,
+      nullValue = TransformNullValue.NULL,
+      renderError,
+      renderLoading,
+      width,
+      height,
+      autoFit = true,
+      children,
+    },
+    forwardRef
+  ) {
+    const { chartId, chartRef } = useChartRefParams()
+    const [dataContext] = useDataAccessor()
+    const { results, triggerParams } = dataContext || {}
+    const result = results?.[chartId]
+    const [plots, setPlots] = useState<Required<MixConfig>['plots']>(
+      DEFAULT_MIX_CONFIG.plots!
+    )
+    const config: MixConfig = useMemo(
+      () =>
+        modifyConfig({
+          ...DEFAULT_MIX_CONFIG,
+          width,
+          height,
+          autoFit,
+          plots,
+        }),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [plots]
+    )
 
-  useImperativeHandle(forwardRef, () => chartRef.current as any, [chartRef])
+    useImperativeHandle(forwardRef, () => chartRef.current as any, [chartRef])
 
-  useEffect(() => {
-    async function fetchData() {
-      if (!result) {
-        return
+    useEffect(() => {
+      async function fetchData() {
+        if (!result) {
+          return
+        }
+
+        const chartData = await Promise.all(
+          result.map(rst => dataToPlots(rst, triggerParams!, nullValue))
+        )
+
+        const plots: MixConfig['plots'] = []
+        chartData.forEach(cd => plots.push(...cd!))
+        setPlots(plots)
       }
 
-      const chartData = await Promise.all(
-        result.map(rst => dataToPlots(rst, triggerParams!, nullValue))
-      )
+      fetchData()
+    }, [result, triggerParams, nullValue])
 
-      const plots: MixConfig['plots'] = []
-      chartData.forEach(cd => plots.push(...cd!))
-      setPlots(plots)
-    }
+    const syncTooltip = useSyncTooltip()
 
-    fetchData()
-  }, [result, triggerParams, nullValue])
-
-  const syncTooltip = useSyncTooltip()
-
-  useEffect(() => {
-    if (!syncTooltip) {
-      return
-    }
-
-    // event of the other charts send to current chart
-    const unsubscribe = syncTooltip.subscribe(e => {
-      if (e.chartId === chartId) {
-        return
-      }
-
-      if (e.type === 'move') {
-        chartRef.current!.getChart().chart.showTooltip({
-          x: e.evt.x || e.evt.data?.x,
-          y: e.evt.y || e.evt.data?.y,
-        })
-        return
-      }
-
-      // if (e.type === 'hide') {
-      //   chartRef.current!.getChart().chart.hideTooltip()
-      //   return
-      // }
-    })
-
-    // event of the current chart to other charts
-    // chartRef.current!.getChart().on('element:mousemove', (evt: PlotEvent) => {
-    //   syncTooltip.emit({ type: 'move', chartId, evt })
-    // })
-    // chartRef.current!.getChart().on('tooltip:hide', (evt: PlotEvent) => {
-    //   syncTooltip.emit({ type: 'hide', chartId, evt })
-    // })
-
-    return () => {
+    useEffect(() => {
       if (!syncTooltip) {
         return
       }
-      unsubscribe()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
-  return (
-    <ChartRef identifier={chartId} chartRef={chartRef}>
-      <Mix {...config} ref={chartRef} onReady={() => {}} />
-      {children}
-    </ChartRef>
-  )
-})
+      // event of the other charts send to current chart
+      const unsubscribe = syncTooltip.subscribe(e => {
+        if (e.chartId === chartId) {
+          return
+        }
+
+        if (e.type === 'move') {
+          chartRef.current!.getChart().chart.showTooltip({
+            x: e.evt.x || e.evt.data?.x,
+            y: e.evt.y || e.evt.data?.y,
+          })
+          return
+        }
+
+        // if (e.type === 'hide') {
+        //   chartRef.current!.getChart().chart.hideTooltip()
+        //   return
+        // }
+      })
+
+      // event of the current chart to other charts
+      // chartRef.current!.getChart().on('element:mousemove', (evt: PlotEvent) => {
+      //   syncTooltip.emit({ type: 'move', chartId, evt })
+      // })
+      // chartRef.current!.getChart().on('tooltip:hide', (evt: PlotEvent) => {
+      //   syncTooltip.emit({ type: 'hide', chartId, evt })
+      // })
+
+      return () => {
+        if (!syncTooltip) {
+          return
+        }
+        unsubscribe()
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
+    return (
+      <ChartRef identifier={chartId} chartRef={chartRef}>
+        <Mix {...config} ref={chartRef} onReady={() => {}} />
+        {children}
+      </ChartRef>
+    )
+  }
+)
 
 async function dataToPlots(
   result: Result,

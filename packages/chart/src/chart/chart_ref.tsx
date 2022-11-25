@@ -1,13 +1,13 @@
 import React, { createContext, useContext, useRef } from 'react'
 import { MixConfig, Plot } from '@ant-design/plots'
 
-export interface GetChartRef {
+export interface Chart {
   getChart: () => Plot<MixConfig>
 }
 
 interface ChartRefProps {
   identifier: string
-  chartRef: React.RefObject<GetChartRef>
+  chartRef: React.RefObject<Chart>
 }
 
 const ChartRefContext = createContext<ChartRefProps>(null as any)
@@ -28,7 +28,7 @@ const SENTINEL = {}
 let incrementalId = 0
 
 export const useChartRefParams = () => {
-  const chartRef = useRef<GetChartRef>(null)
+  const chartRef = useRef<Chart>(null)
   const chartId = useRef(SENTINEL)
   if (chartId.current === SENTINEL) {
     chartId.current = ++incrementalId

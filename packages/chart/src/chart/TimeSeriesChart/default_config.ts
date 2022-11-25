@@ -12,7 +12,7 @@ export const DEFAULT_MIX_CONFIG: MixConfig = {
     layout: 'horizontal',
     position: 'bottom',
     slidable: true,
-  },
+  } as any,
   // Use default plots so that we can get the chart ref at the initial rendering.
   plots: [
     {
