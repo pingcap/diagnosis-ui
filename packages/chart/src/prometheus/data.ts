@@ -22,8 +22,8 @@ export function processRawData(
   options: TriggerParams
 ): DataPoint[] {
   if (isMatrixData(data)) {
-    const stepMs = options.step ? options.step * 1000 : NaN
-    let baseTimestamp = options.start_time * 1000
+    // const stepMs = options.step ? options.step * 1000 : NaN
+    // let baseTimestamp = options.start_time * 1000
     const dps: DataPoint[] = []
 
     for (const value of data.values) {
@@ -34,17 +34,24 @@ export function processRawData(
       }
 
       const timestamp = value[0] * 1000
-      for (let t = baseTimestamp; t < timestamp; t += stepMs) {
-        dps.push([t, null])
+      if (
+        timestamp < options.start_time * 1000 ||
+        timestamp > options.end_time * 1000
+      ) {
+        continue
       }
-      baseTimestamp = timestamp + stepMs
+
+      // for (let t = baseTimestamp; t < timestamp; t += stepMs) {
+      //   dps.push([t, null])
+      // }
+      // baseTimestamp = timestamp + stepMs
       dps.push([timestamp, dpValue])
     }
 
-    const endTimestamp = options.end_time * 1000
-    for (let t = baseTimestamp; t <= endTimestamp; t += stepMs) {
-      dps.push([t, null])
-    }
+    // const endTimestamp = options.end_time * 1000
+    // for (let t = baseTimestamp; t <= endTimestamp; t += stepMs) {
+    //   dps.push([t, null])
+    // }
 
     return dps
   }

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect } from 'react'
+import React, { createContext, useContext, useEffect, useRef } from 'react'
 import { ColorAttr } from '@antv/g2plot'
 
 import { useChartRef } from '../chart/chart_ref'
@@ -22,9 +22,9 @@ export interface QueryGroup {
 const QueryRegisterContext = createContext<QueryGroup[]>([])
 
 export const QueryRegister: React.FC = ({ children }) => {
-  const register = new Array()
+  const register = useRef([])
   return (
-    <QueryRegisterContext.Provider value={register}>
+    <QueryRegisterContext.Provider value={register.current}>
       {children}
     </QueryRegisterContext.Provider>
   )

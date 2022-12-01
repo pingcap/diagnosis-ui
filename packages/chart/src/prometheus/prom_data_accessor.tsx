@@ -1,4 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useState,
+} from 'react'
 import format from 'string-template'
 
 import {
@@ -22,36 +28,38 @@ export interface Trigger {
   (params: TriggerParams): void
 }
 
-export interface PromDataAccessor {
-  fetch: (
-    query: string,
-    triggerParams: Required<TriggerParams>
-  ) => Promise<PromDataSuccessResponse | PromDataErrorResponse>
-  setTrigger?: (trigger: Trigger) => void
+interface Fetch {
+  (query: string, triggerParams: Required<TriggerParams>): Promise<
+    PromDataSuccessResponse | PromDataErrorResponse
+  >
 }
 
-export const PromDataAccessor: React.FC<PromDataAccessor> = ({
-  fetch,
-  setTrigger,
-  children,
-}) => {
+export interface PromDataAccessor {
+  fetch: Fetch
+  params?: TriggerParams
+}
+
+export const PromDataAccessor = forwardRef<
+  Trigger,
+  React.PropsWithChildren<PromDataAccessor>
+>(function PromDataAccessor({ fetch, params, children }, ref) {
   const useDataState = useState<DataContext>()
+
   return (
     <DataAccessorContext.Provider value={useDataState}>
       <QueryRegister>
-        <Fetcher fetch={fetch} setTrigger={setTrigger}>
+        <Fetcher fetch={fetch} params={params} ref={ref}>
           {children}
         </Fetcher>
       </QueryRegister>
     </DataAccessorContext.Provider>
   )
-}
+})
 
-const Fetcher: React.FC<PromDataAccessor> = ({
-  fetch,
-  setTrigger,
-  children,
-}) => {
+const Fetcher = forwardRef<
+  Trigger,
+  React.PropsWithChildren<{ fetch: Fetch; params?: TriggerParams }>
+>(function Fetcher({ fetch, params, children }, ref) {
   const queryRegister = useQueryRegister()
   const [, setDataContext] = useDataAccessor()
 
@@ -108,10 +116,15 @@ const Fetcher: React.FC<PromDataAccessor> = ({
     setDataContext({ results, triggerParams })
   }
 
+  useImperativeHandle(ref, () => batchFetch)
+
   useEffect(() => {
-    setTrigger?.(batchFetch)
+    if (!params) {
+      return
+    }
+    batchFetch(params)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [params])
 
   return <>{children}</>
-}
+})

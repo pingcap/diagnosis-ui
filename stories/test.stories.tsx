@@ -16,17 +16,19 @@ export default {
 }
 
 export const Test = ({ cteGap, ...args }) => {
-  const triggerRef: MutableRefObject<Trigger> = useRef<Trigger>(null as any)
+  const triggerRef = useRef<Trigger>(null as any)
   const refreshChart = () => {
     triggerRef.current({ start_time: 1666100460, end_time: 1666100910 })
   }
+
+  useEffect(() => {
+    refreshChart()
+  }, [])
+
   return (
     <PromDataAccessor
+      ref={triggerRef}
       fetch={(query, tp) => Promise.resolve(testData as any)}
-      setTrigger={trigger => {
-        triggerRef.current = trigger
-        refreshChart()
-      }}
     >
       <SyncTooltip>
         <TimeSeriesChart

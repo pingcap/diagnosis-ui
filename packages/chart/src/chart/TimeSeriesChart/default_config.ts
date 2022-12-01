@@ -4,14 +4,22 @@ export const DEFAULT_MIX_CONFIG: MixConfig = {
   tooltip: {
     shared: true,
     showCrosshairs: true,
+    domStyles: {
+      'g2-tooltip-value': {
+        maxWidth: '200px',
+        overflow: 'hidden',
+        'text-overflow': 'ellipsis',
+        'white-space': 'nowrap',
+      },
+    },
   },
   syncViewPadding: true,
   legend: {
     flipPage: true,
-    maxRow: 1,
+    maxRow: 2,
     layout: 'horizontal',
     position: 'bottom',
-    slidable: true,
+    radio: {},
   } as any,
   // Use default plots so that we can get the chart ref at the initial rendering.
   plots: [

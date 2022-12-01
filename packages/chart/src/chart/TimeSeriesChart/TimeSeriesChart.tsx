@@ -149,7 +149,7 @@ async function dataToPlots(
   const dataList = await Promise.all(promise)
   const plots: { [type: string]: PlotConfig } = {}
 
-  const formatter = (v: any) => {
+  const dataFormatter = (v: any) => {
     let _unit = unit || 'none'
     if (['short', 'none'].includes(_unit) && v < 1) {
       return v.toPrecision(3)
@@ -182,7 +182,7 @@ async function dataToPlots(
                 sync: true,
                 nice: true,
                 alias: 'Value',
-                formatter,
+                formatter: dataFormatter,
               },
               name: {
                 alias: 'Name',
