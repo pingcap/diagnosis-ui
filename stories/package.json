@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "dependencies": {
-    "@diag-ui/chart": "*"
+    "@diag-ui/chart": "*",
+    "@ant-design/charts": "^1.4.2"
   }
 }

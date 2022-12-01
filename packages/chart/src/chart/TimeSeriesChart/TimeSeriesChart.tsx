@@ -18,7 +18,8 @@ import { useSyncTooltip } from '../sync_tooltip'
 type PlotConfig = GetElementType<Required<MixConfig>['plots']>
 
 export interface TimeSeriesChartProps<P = any, TP = any> {
-  onEvents?: Record<string, Function>
+  onEvents?: MixConfig['onEvent']
+  onReady?: MixConfig['onReady']
   modifyConfig?: (originConfig: MixConfig) => MixConfig
   timezone?: number
   nullValue?: TransformNullValue
@@ -34,6 +35,7 @@ export const TimeSeriesChart = forwardRef<Chart, TimeSeriesChartProps>(
   function TimeSeriesChart(
     {
       onEvents,
+      onReady,
       modifyConfig = (cfg: MixConfig) => cfg,
       timezone,
       nullValue = TransformNullValue.NULL,
@@ -132,7 +134,7 @@ export const TimeSeriesChart = forwardRef<Chart, TimeSeriesChartProps>(
 
     return (
       <ChartRef identifier={chartId} chartRef={chartRef}>
-        <Mix {...config} ref={chartRef} onReady={() => {}} />
+        <Mix {...config} ref={chartRef} onReady={onReady} onEvent={onEvents} />
         {children}
       </ChartRef>
     )

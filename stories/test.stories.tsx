@@ -33,7 +33,6 @@ export const Test = ({ cteGap, ...args }) => {
       <SyncTooltip>
         <TimeSeriesChart
           modifyConfig={c => {
-            console.log(c)
             return c
           }}
         >
@@ -55,7 +54,6 @@ export const Test = ({ cteGap, ...args }) => {
         </TimeSeriesChart>{' '}
         <TimeSeriesChart
           modifyConfig={c => {
-            console.log(c)
             return c
           }}
         >
