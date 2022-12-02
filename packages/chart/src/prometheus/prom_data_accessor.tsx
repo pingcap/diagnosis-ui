@@ -15,7 +15,11 @@ import {
   useDataAccessor,
 } from '../data_accessor'
 import { QueryRegister, useQueryRegister } from './query_register'
-import { PromDataErrorResponse, PromDataSuccessResponse } from './types'
+import {
+  PromDataErrorResponse,
+  PromDataSuccessResponse,
+  PromMatrixData,
+} from './types'
 import { processRawData, DEFAULT_MIN_INTERVAL_SEC } from './data'
 
 export interface TriggerParams {
@@ -56,6 +60,8 @@ export const PromDataAccessor = forwardRef<
   )
 })
 
+export type PromMatrixResult = PromMatrixData['result'][0]
+
 const Fetcher = forwardRef<
   Trigger,
   React.PropsWithChildren<{ fetch: Fetch; params?: TriggerParams }>
@@ -73,7 +79,7 @@ const Fetcher = forwardRef<
   // Batch requests with data accessor.
   const batchFetch: Trigger = async params => {
     const triggerParams = { step: DEFAULT_MIN_INTERVAL_SEC, ...params }
-    const results: ResultGroup = {}
+    const results: ResultGroup<PromMatrixResult> = {}
     queryRegister.forEach(queryGroup => {
       const chartId = queryGroup.chartId
 
@@ -82,8 +88,8 @@ const Fetcher = forwardRef<
       }
 
       // Multiple queries in a query group.
-      const promise: Promise<ProcessedData | null>[] = queryGroup.queries.map(
-        q =>
+      const promise: Promise<ProcessedData<PromMatrixResult> | null>[] =
+        queryGroup.queries.map(q =>
           fetch(q.promql, triggerParams).then(resp => {
             if (resp.status !== 'success') {
               return null
@@ -101,9 +107,10 @@ const Fetcher = forwardRef<
               type: q.type,
               name: format(q.name, r.metric),
               data: processRawData(r, triggerParams),
+              rawData: r,
             }))
           })
-      )
+        )
 
       // Multiple query groups in a chart.
       // Each query group can have its own yAxis and unit config.

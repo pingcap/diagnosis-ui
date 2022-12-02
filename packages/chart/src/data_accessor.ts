@@ -5,20 +5,21 @@ import { TriggerParams } from './prometheus/prom_data_accessor'
 import { ChartType, QueryGroup } from './prometheus/query_register'
 import { DataPoint } from './chart/types'
 
-export type ProcessedData = {
+export type ProcessedData<T = any> = {
   data: DataPoint[]
+  rawData: T
   name: string
   type: ChartType
   color?: ColorAttr
 }[]
 
-export type Result = {
+export type Result<T = any> = {
   queryGroup: QueryGroup
-  promise: Promise<ProcessedData | null>[]
+  promise: Promise<ProcessedData<T> | null>[]
 }
 
-export type ResultGroup = {
-  [id: string]: Result[]
+export type ResultGroup<T = any> = {
+  [id: string]: Result<T>[]
 }
 
 export type DataContext = { results: ResultGroup; triggerParams: TriggerParams }

@@ -8,7 +8,10 @@ import React, {
   useState,
 } from 'react'
 
-import { TriggerParams } from '../../prometheus/prom_data_accessor'
+import {
+  PromMatrixResult,
+  TriggerParams,
+} from '../../prometheus/prom_data_accessor'
 import { Chart, ChartRef, useChartRefParams } from '../chart_ref'
 import { Result, useDataAccessor } from '../../data_accessor'
 import { GetElementType, TransformNullValue } from '../types'
@@ -142,7 +145,7 @@ export const TimeSeriesChart = forwardRef<Chart, TimeSeriesChartProps>(
 )
 
 async function dataToPlots(
-  result: Result,
+  result: Result<PromMatrixResult>,
   triggerParams: TriggerParams,
   nullValue: TransformNullValue
 ): Promise<MixConfig['plots']> {
@@ -204,6 +207,7 @@ async function dataToPlots(
             ? null
             : 0,
           name: d.name,
+          rawData: d.rawData,
         }))
       )
     })
