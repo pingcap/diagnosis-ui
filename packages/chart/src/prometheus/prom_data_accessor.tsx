@@ -80,7 +80,7 @@ const Fetcher = forwardRef<
   const batchFetch: Trigger = async params => {
     const triggerParams = { step: DEFAULT_MIN_INTERVAL_SEC, ...params }
     const results: ResultGroup<PromMatrixResult> = {}
-    queryRegister.forEach(queryGroup => {
+    queryRegister.current?.forEach(queryGroup => {
       const chartId = queryGroup.chartId
 
       if (!results[chartId]) {

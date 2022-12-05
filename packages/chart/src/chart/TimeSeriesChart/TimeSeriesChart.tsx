@@ -155,6 +155,9 @@ async function dataToPlots(
   const plots: { [type: string]: PlotConfig } = {}
 
   const dataFormatter = (v: any) => {
+    if (v === null) {
+      return v
+    }
     let _unit = unit || 'none'
     if (['short', 'none'].includes(_unit) && v < 1) {
       return v.toPrecision(3)
@@ -185,7 +188,6 @@ async function dataToPlots(
               },
               data: {
                 sync: true,
-                nice: true,
                 alias: 'Value',
                 formatter: dataFormatter,
               },

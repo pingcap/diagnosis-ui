@@ -1,4 +1,11 @@
-import React, { createContext, useContext, useEffect, useRef } from 'react'
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  RefObject,
+  MutableRefObject,
+} from 'react'
 import { ColorAttr } from '@antv/g2plot'
 
 import { useChartRef } from '../chart/chart_ref'
@@ -19,12 +26,12 @@ export interface QueryGroup {
   position?: string
 }
 
-const QueryRegisterContext = createContext<QueryGroup[]>([])
+const QueryRegisterContext = createContext<RefObject<QueryGroup[]>>(null as any)
 
 export const QueryRegister: React.FC = ({ children }) => {
   const register = useRef([])
   return (
-    <QueryRegisterContext.Provider value={register.current}>
+    <QueryRegisterContext.Provider value={register}>
       {children}
     </QueryRegisterContext.Provider>
   )
@@ -39,11 +46,15 @@ export const PromQueryGroup: React.FC<Omit<QueryGroup, 'chartId'>> = ({
   unit,
   position,
 }) => {
-  const register = useQueryRegister()
+  const register = useQueryRegister() as MutableRefObject<QueryGroup[]>
   const chartRef = useChartRef()
   useEffect(() => {
-    register.push({ chartId: chartRef.identifier, queries, unit, position })
+    const group = { chartId: chartRef.identifier, queries, unit, position }
+    register.current?.push(group)
+    return () => {
+      register.current = register.current.filter(g => g !== group)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [queries, unit, position])
   return null
 }
