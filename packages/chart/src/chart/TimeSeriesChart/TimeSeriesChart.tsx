@@ -188,6 +188,7 @@ async function dataToPlots(
               },
               data: {
                 sync: true,
+                nice: true,
                 alias: 'Value',
                 formatter: dataFormatter,
               },
