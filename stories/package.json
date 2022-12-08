@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@diag-ui/chart": "*",
+    "dayjs": "^1.11.6",
     "@ant-design/charts": "^1.4.2"
   }
 }

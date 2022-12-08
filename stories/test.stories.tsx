@@ -5,8 +5,9 @@ import {
   PromQueryGroup,
   TimeSeriesChart,
   Trigger,
-} from '@diag-ui/chart'
+} from '@diag-ui/chart/src/index'
 import testData from './data.json'
+import emptyData from './empty_data.json'
 import { SyncTooltip } from '@diag-ui/chart/src/chart/sync_tooltip'
 
 export default {
@@ -28,7 +29,7 @@ export const Test = ({ cteGap, ...args }) => {
   return (
     <PromDataAccessor
       ref={triggerRef}
-      fetch={(query, tp) => Promise.resolve(testData as any)}
+      fetch={(query, tp) => Promise.resolve(emptyData as any)}
     >
       <SyncTooltip>
         <TimeSeriesChart

@@ -102,6 +102,18 @@ const Fetcher = forwardRef<
               return null
             }
             const result = resp.data.result
+            // for empty chart
+            if (!result.length) {
+              return [
+                {
+                  color: q.color,
+                  type: q.type,
+                  name: '',
+                  data: [],
+                  rawData: {} as any,
+                },
+              ]
+            }
             return result.map(r => ({
               color: q.color,
               type: q.type,
