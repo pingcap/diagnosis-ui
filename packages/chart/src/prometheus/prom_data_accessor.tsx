@@ -143,7 +143,7 @@ const Fetcher = forwardRef<
     }
     batchFetch(params)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params])
+  }, [params?.start_time, params?.end_time, params?.step])
 
   return <>{children}</>
 })
