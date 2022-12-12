@@ -21,6 +21,7 @@ import {
   PromMatrixData,
 } from './types'
 import { processRawData, DEFAULT_MIN_INTERVAL_SEC } from './data'
+import { computeStepByContainer } from '../utils/chart'
 
 export interface TriggerParams {
   start_time: number
@@ -82,6 +83,11 @@ const Fetcher = forwardRef<
     const results: ResultGroup<PromMatrixResult> = {}
     queryRegister.current?.forEach(queryGroup => {
       const chartId = queryGroup.chartId
+      const step = computeStepByContainer(
+        queryGroup.chartRef,
+        [params.start_time, params.end_time],
+        triggerParams.step
+      )
 
       if (!results[chartId]) {
         results[chartId] = []
@@ -90,7 +96,7 @@ const Fetcher = forwardRef<
       // Multiple queries in a query group.
       const promise: Promise<ProcessedData<PromMatrixResult> | null>[] =
         queryGroup.queries.map(q =>
-          fetch(q.promql, triggerParams).then(resp => {
+          fetch(q.promql, { ...triggerParams, step }).then(resp => {
             if (resp.status !== 'success') {
               return null
             }

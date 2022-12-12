@@ -29,7 +29,9 @@ export const Test = ({ cteGap, ...args }) => {
   return (
     <>
       <PromDataAccessor
-        fetch={(query, tp) => Promise.resolve(emptyData as any)}
+        fetch={(query, tp) => {
+          return Promise.resolve(emptyData as any)
+        }}
         params={{ start_time: 1666100460, end_time: 1666100910 }}
       >
         <SyncTooltip>

@@ -8,7 +8,7 @@ import React, {
 } from 'react'
 import { ColorAttr } from '@antv/g2plot'
 
-import { useChartRef } from '../chart/chart_ref'
+import { Chart, useChartRef } from '../chart/chart_ref'
 
 export type ChartType = 'line' | 'bar' | 'column' | 'area' | 'scatter'
 
@@ -21,6 +21,7 @@ export interface Query {
 
 export interface QueryGroup {
   chartId: string
+  chartRef: React.RefObject<Chart>
   queries: Query[]
   unit: string
   position?: string
@@ -41,15 +42,19 @@ export const useQueryRegister = () => {
   return useContext(QueryRegisterContext)
 }
 
-export const PromQueryGroup: React.FC<Omit<QueryGroup, 'chartId'>> = ({
-  queries,
-  unit,
-  position,
-}) => {
+export const PromQueryGroup: React.FC<
+  Omit<QueryGroup, 'chartId' | 'chartRef'>
+> = ({ queries, unit, position }) => {
   const register = useQueryRegister() as MutableRefObject<QueryGroup[]>
   const chartRef = useChartRef()
   useEffect(() => {
-    const group = { chartId: chartRef.identifier, queries, unit, position }
+    const group = {
+      chartId: chartRef.identifier,
+      chartRef: chartRef.chartRef,
+      queries,
+      unit,
+      position,
+    }
     register.current?.push(group)
     return () => {
       register.current = register.current.filter(g => g !== group)
