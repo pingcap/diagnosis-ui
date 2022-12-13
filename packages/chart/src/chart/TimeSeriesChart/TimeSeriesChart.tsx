@@ -177,15 +177,16 @@ async function dataToPlots(
             shape: 'circle',
             colorField: 'name',
             seriesField: 'name',
+            xAxis: {
+              sync: true,
+              nice: false,
+              alias: 'Time',
+              type: 'time',
+              min: triggerParams.start_time * 1000,
+              max: triggerParams.end_time * 1000,
+              mask: 'YYYY-MM-DD HH:mm:ss',
+            },
             meta: {
-              timestamp: {
-                sync: true,
-                alias: 'Time',
-                type: 'time',
-                min: triggerParams.start_time * 1000,
-                max: triggerParams.end_time * 1000,
-                mask: 'YYYY-MM-DD HH:mm:ss',
-              },
               data: {
                 sync: true,
                 nice: true,
