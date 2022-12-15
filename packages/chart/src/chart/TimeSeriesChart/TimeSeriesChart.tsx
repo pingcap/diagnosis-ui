@@ -205,7 +205,7 @@ async function dataToPlots(
       plots[d.type].options.data!.push(
         ...d.data.map(_d => ({
           timestamp: _d[0],
-          data: !!_d[1]
+          data: (!!_d[1] && _d[1] !== Number.POSITIVE_INFINITY && _d[1] !== Number.NEGATIVE_INFINITY)
             ? _d[1]
             : nullValue === TransformNullValue.NULL
             ? null
