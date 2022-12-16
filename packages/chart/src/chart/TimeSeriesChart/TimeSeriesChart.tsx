@@ -214,11 +214,16 @@ async function dataToPlots(
       plots[d.type].options.data!.push(
         ...d.data.map(_d => ({
           timestamp: _d[0],
-          data: !!_d[1]
-            ? _d[1]
-            : nullValue === TransformNullValue.NULL
-            ? null
-            : 0,
+          // Not support Infinity
+          // https://github.com/antvis/G2/pull/438/files#diff-99d8cc124f84dcc0550b633ae5ee452474b01b8bb88281acd493809635c3c78bR11
+          data:
+            !!_d[1] &&
+            _d[1] !== Number.POSITIVE_INFINITY &&
+            _d[1] !== Number.NEGATIVE_INFINITY
+              ? _d[1]
+              : nullValue === TransformNullValue.NULL
+              ? null
+              : 0,
           name: d.name,
           rawData: d.rawData,
         }))
