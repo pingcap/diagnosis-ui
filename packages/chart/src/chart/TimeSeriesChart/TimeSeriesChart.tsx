@@ -173,7 +173,7 @@ async function dataToPlots(
   }
 
   dataList.forEach(data => {
-    data?.forEach((d, index) => {
+    data?.forEach(d => {
       if (!plots[d.type]) {
         plots[d.type] = {
           type: d.type,

@@ -34,15 +34,15 @@ export const Test = ({ cteGap, ...args }) => {
           return Promise.resolve(testData as any)
           // return Promise.resolve(emptyData as any)
         }}
-        params={{ start_time: 1671092266, end_time: 1671100417 }}
+        params={{ start_time: 1666100460, end_time: 1666100910 }}
       >
         <SyncTooltip>
           <TimeSeriesChart
             annotations={[
               {
                 type: 'line',
-                start: [1671092566000, 'min'],
-                end: [1671092566000, 'max'],
+                start: [1666100560000, 'min'],
+                end: [1666100560000, 'max'],
                 style: {
                   lineDash: [4, 4],
                 },
@@ -64,7 +64,7 @@ export const Test = ({ cteGap, ...args }) => {
                 {
                   promql:
                     'sum(rate(tidb_tikvclient_request_seconds_sum{store!="0"}[2m])) by (type)/ sum(rate(tidb_tikvclient_request_seconds_count{store!="0"}[2m])) by (type)',
-                  name: '{type}',
+                  name: '{sql_type}',
                   type: 'line',
                 },
               ]}
