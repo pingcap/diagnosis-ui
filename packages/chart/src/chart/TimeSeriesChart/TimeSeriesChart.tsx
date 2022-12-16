@@ -29,6 +29,7 @@ export interface TimeSeriesChartProps<P = any, TP = any> {
   nullValue?: TransformNullValue
   renderError?: React.ReactNode
   renderLoading?: React.ReactNode
+  onLoadingChange?: (isLoading: boolean) => void
   width?: number
   height?: number
   autoFit?: boolean
@@ -46,6 +47,7 @@ export const TimeSeriesChart = forwardRef<Chart, TimeSeriesChartProps>(
       nullValue = TransformNullValue.NULL,
       renderError,
       renderLoading,
+      onLoadingChange,
       width,
       height,
       autoFit = true,
@@ -82,6 +84,7 @@ export const TimeSeriesChart = forwardRef<Chart, TimeSeriesChartProps>(
           return
         }
 
+        onLoadingChange?.(true)
         const chartData = await Promise.all(
           result.map(rst =>
             dataToPlots(rst, triggerParams!, nullValue, annotations)
@@ -91,6 +94,7 @@ export const TimeSeriesChart = forwardRef<Chart, TimeSeriesChartProps>(
         const plots: MixConfig['plots'] = []
         chartData.forEach(cd => plots.push(...cd!))
         setPlots(plots)
+        onLoadingChange?.(false)
       }
 
       fetchData()
