@@ -4,6 +4,7 @@ import {
   PromDataAccessor,
   PromQueryGroup,
   TimeSeriesChart,
+  TransformNullValue,
   Trigger,
 } from '@diag-ui/chart/src/index'
 import testData from './data.json'
@@ -17,41 +18,55 @@ export default {
 }
 
 export const Test = ({ cteGap, ...args }) => {
-  const triggerRef = useRef<Trigger>(null as any)
-  const refreshChart = () => {
-    triggerRef.current({ start_time: 1666100460, end_time: 1666100910 })
-  }
+  // const triggerRef = useRef<Trigger>(null as any)
+  // const refreshChart = () => {
+  //   triggerRef.current({ start_time: 1666100460, end_time: 1666100910 })
+  // }
 
-  useEffect(() => {
-    refreshChart()
-  }, [])
+  // useEffect(() => {
+  //   refreshChart()
+  // }, [])
 
   return (
     <>
       <PromDataAccessor
         fetch={(query, tp) => {
-          return Promise.resolve(emptyData as any)
+          return Promise.resolve(testData as any)
+          // return Promise.resolve(emptyData as any)
         }}
-        params={{ start_time: 1666100460, end_time: 1666100910 }}
+        params={{ start_time: 1671092266, end_time: 1671100417 }}
       >
         <SyncTooltip>
           <TimeSeriesChart
-            modifyConfig={c => {
-              return c
-            }}
+            annotations={[
+              {
+                type: 'line',
+                start: [1671092566000, 'min'],
+                end: [1671092566000, 'max'],
+                style: {
+                  lineDash: [4, 4],
+                },
+                top: true,
+                text: {
+                  content: 'test',
+                },
+              },
+            ]}
+            nullValue={TransformNullValue.AS_ZERO}
           >
             <PromQueryGroup
               queries={[
-                {
-                  promql: 'test',
-                  name: '{sql_type}',
-                  type: 'scatter',
-                },
                 // {
-                //   promql: 'test2',
+                //   promql: 'test',
                 //   name: '{sql_type}',
-                //   type: 'line',
+                //   type: 'scatter',
                 // },
+                {
+                  promql:
+                    'sum(rate(tidb_tikvclient_request_seconds_sum{store!="0"}[2m])) by (type)/ sum(rate(tidb_tikvclient_request_seconds_count{store!="0"}[2m])) by (type)',
+                  name: '{type}',
+                  type: 'line',
+                },
               ]}
               unit="s"
             />
@@ -59,7 +74,7 @@ export const Test = ({ cteGap, ...args }) => {
         </SyncTooltip>
       </PromDataAccessor>
 
-      <PromDataAccessor
+      {/* <PromDataAccessor
         ref={triggerRef}
         fetch={(query, tp) => Promise.resolve(emptyData as any)}
       >
@@ -102,7 +117,7 @@ export const Test = ({ cteGap, ...args }) => {
             />
           </TimeSeriesChart>
         </SyncTooltip>
-      </PromDataAccessor>
+      </PromDataAccessor> */}
     </>
   )
 }

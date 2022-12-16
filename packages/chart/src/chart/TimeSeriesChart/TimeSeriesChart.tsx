@@ -1,4 +1,5 @@
-import { Mix, MixConfig, PlotEvent } from '@ant-design/plots'
+import { Mix, MixConfig } from '@ant-design/plots'
+import { Annotation } from '@antv/g2plot'
 import { getValueFormat } from '@baurine/grafana-value-formats'
 import React, {
   forwardRef,
@@ -31,6 +32,7 @@ export interface TimeSeriesChartProps<P = any, TP = any> {
   width?: number
   height?: number
   autoFit?: boolean
+  annotations?: Annotation[]
   children?: React.ReactNode
 }
 
@@ -47,6 +49,7 @@ export const TimeSeriesChart = forwardRef<Chart, TimeSeriesChartProps>(
       width,
       height,
       autoFit = true,
+      annotations,
       children,
     },
     forwardRef
@@ -80,7 +83,9 @@ export const TimeSeriesChart = forwardRef<Chart, TimeSeriesChartProps>(
         }
 
         const chartData = await Promise.all(
-          result.map(rst => dataToPlots(rst, triggerParams!, nullValue))
+          result.map(rst =>
+            dataToPlots(rst, triggerParams!, nullValue, annotations)
+          )
         )
 
         const plots: MixConfig['plots'] = []
@@ -89,7 +94,8 @@ export const TimeSeriesChart = forwardRef<Chart, TimeSeriesChartProps>(
       }
 
       fetchData()
-    }, [result, triggerParams, nullValue])
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [result, triggerParams])
 
     const syncTooltip = useSyncTooltip()
 
@@ -147,7 +153,8 @@ export const TimeSeriesChart = forwardRef<Chart, TimeSeriesChartProps>(
 async function dataToPlots(
   result: Result<PromMatrixResult>,
   triggerParams: TriggerParams,
-  nullValue: TransformNullValue
+  nullValue: TransformNullValue,
+  annotations?: Annotation[]
 ): Promise<MixConfig['plots']> {
   const { promise, queryGroup } = result
   const { position, unit } = queryGroup
@@ -166,7 +173,7 @@ async function dataToPlots(
   }
 
   dataList.forEach(data => {
-    data?.forEach(d => {
+    data?.forEach((d, index) => {
       if (!plots[d.type]) {
         plots[d.type] = {
           type: d.type,
@@ -186,11 +193,13 @@ async function dataToPlots(
               max: triggerParams.end_time * 1000,
               mask: 'YYYY-MM-DD HH:mm:ss',
             },
+            yAxis: {
+              sync: true,
+              nice: true,
+              alias: 'Value',
+            },
             meta: {
               data: {
-                sync: true,
-                nice: true,
-                alias: 'Value',
                 formatter: dataFormatter,
               },
               name: {
@@ -217,5 +226,27 @@ async function dataToPlots(
     })
   })
 
-  return Object.values(plots)
+  const plotsValues = Object.values(plots)
+  const noData = plotsValues.every(p => !p.options.data?.length)
+  const havePlot = !!plotsValues[0]
+
+  if (havePlot && noData) {
+    plotsValues[0].options.data?.push(
+      // placeholder for y axis if there's no data in the plot
+      {
+        timestamp: 0,
+        data: 1,
+      }
+    )
+  }
+
+  // attach annotations
+  if (havePlot) {
+    ;(plotsValues[0].options as Mutable<PlotConfig['options']>).annotations =
+      annotations
+  }
+
+  return plotsValues
 }
+
+type Mutable<T> = { -readonly [P in keyof T]: T[P] }
