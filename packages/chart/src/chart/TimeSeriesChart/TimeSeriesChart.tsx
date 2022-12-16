@@ -19,6 +19,8 @@ import { GetElementType, TransformNullValue } from '../types'
 import { DEFAULT_MIX_CONFIG } from './default_config'
 import { useSyncTooltip } from '../sync_tooltip'
 
+export { type Annotation } from '@antv/g2plot'
+
 type PlotConfig = GetElementType<Required<MixConfig>['plots']>
 
 export interface TimeSeriesChartProps<P = any, TP = any> {
@@ -84,17 +86,22 @@ export const TimeSeriesChart = forwardRef<Chart, TimeSeriesChartProps>(
           return
         }
 
-        onLoadingChange?.(true)
-        const chartData = await Promise.all(
-          result.map(rst =>
-            dataToPlots(rst, triggerParams!, nullValue, annotations)
+        try {
+          onLoadingChange?.(true)
+          const chartData = await Promise.all(
+            result.map(rst =>
+              dataToPlots(rst, triggerParams!, nullValue, annotations)
+            )
           )
-        )
 
-        const plots: MixConfig['plots'] = []
-        chartData.forEach(cd => plots.push(...cd!))
-        setPlots(plots)
-        onLoadingChange?.(false)
+          const plots: MixConfig['plots'] = []
+          chartData.forEach(cd => plots.push(...cd!))
+          setPlots(plots)
+        } catch (e) {
+          throw e
+        } finally {
+          onLoadingChange?.(false)
+        }
       }
 
       fetchData()

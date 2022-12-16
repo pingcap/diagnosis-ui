@@ -19,6 +19,8 @@ import {
   PromDataErrorResponse,
   PromDataSuccessResponse,
   PromMatrixData,
+  PromMetric,
+  PromValue,
 } from './types'
 import { processRawData, DEFAULT_MIN_INTERVAL_SEC } from './data'
 import { computeStepByContainer } from '../utils/chart'
@@ -41,19 +43,28 @@ interface Fetch {
 
 export interface PromDataAccessor {
   fetch: Fetch
+  onBatchLoadingChange?: (isLoading: boolean) => void
   params?: TriggerParams
 }
 
 export const PromDataAccessor = forwardRef<
   Trigger,
   React.PropsWithChildren<PromDataAccessor>
->(function PromDataAccessor({ fetch, params, children }, ref) {
+>(function PromDataAccessor(
+  { fetch, params, onBatchLoadingChange, children },
+  ref
+) {
   const useDataState = useState<DataContext>()
 
   return (
     <DataAccessorContext.Provider value={useDataState}>
       <QueryRegister>
-        <Fetcher fetch={fetch} params={params} ref={ref}>
+        <Fetcher
+          fetch={fetch}
+          params={params}
+          ref={ref}
+          onBatchLoadingChange={onBatchLoadingChange}
+        >
           {children}
         </Fetcher>
       </QueryRegister>
@@ -65,8 +76,12 @@ export type PromMatrixResult = PromMatrixData['result'][0]
 
 const Fetcher = forwardRef<
   Trigger,
-  React.PropsWithChildren<{ fetch: Fetch; params?: TriggerParams }>
->(function Fetcher({ fetch, params, children }, ref) {
+  React.PropsWithChildren<{
+    fetch: Fetch
+    onBatchLoadingChange?: (isLoading: boolean) => void
+    params?: TriggerParams
+  }>
+>(function Fetcher({ fetch, params, onBatchLoadingChange, children }, ref) {
   const queryRegister = useQueryRegister()
   const [, setDataContext] = useDataAccessor()
 
@@ -137,6 +152,32 @@ const Fetcher = forwardRef<
         queryGroup,
       })
     })
+
+    if (!!onBatchLoadingChange) {
+      onBatchLoadingChange(true)
+      const allPromises = Object.values(results).reduce(
+        (prev, cur) => {
+          prev.push(
+            ...cur.reduce(
+              (prev2, cur2) => {
+                prev2.push(...cur2.promise)
+                return prev2
+              },
+              [] as Promise<ProcessedData<{
+                metric: PromMetric
+                values: PromValue[]
+              }> | null>[]
+            )
+          )
+          return prev
+        },
+        [] as Promise<ProcessedData<{
+          metric: PromMetric
+          values: PromValue[]
+        }> | null>[]
+      )
+      Promise.all(allPromises).finally(() => onBatchLoadingChange(false))
+    }
 
     setDataContext({ results, triggerParams })
   }
