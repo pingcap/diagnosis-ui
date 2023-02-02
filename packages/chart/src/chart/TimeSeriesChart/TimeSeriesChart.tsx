@@ -259,7 +259,12 @@ async function dataToPlots(
   // attach annotations
   if (havePlot) {
     ;(plotsValues[0].options as Mutable<PlotConfig['options']>).annotations =
-      annotations
+      annotations?.map((a: any, i) => ({
+        ...a,
+        text: a.text
+          ? { autoRotate: false, position: `${(i * 5) % 100}%`, ...a.text }
+          : undefined,
+      }))
   }
 
   return plotsValues
