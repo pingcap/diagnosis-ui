@@ -6,6 +6,7 @@ import React, {
   useState,
 } from 'react'
 import format from 'string-template'
+import { encode } from 'he'
 
 import {
   DataAccessorContext,
@@ -135,13 +136,23 @@ const Fetcher = forwardRef<
                 },
               ]
             }
-            return result.map(r => ({
-              color: q.color,
-              type: q.type,
-              name: format(q.name, r.metric),
-              data: processRawData(r, triggerParams),
-              rawData: r,
-            }))
+            return result.map(r => {
+              const encodedMetric = Object.keys(r.metric).reduce(
+                (metric, key) => {
+                  metric[encode(key)] = encode(r.metric[key])
+                  return metric
+                },
+                {} as Record<string, string>
+              )
+
+              return {
+                color: q.color,
+                type: q.type,
+                name: format(q.name, encodedMetric),
+                data: processRawData(r, triggerParams),
+                rawData: r,
+              }
+            })
           })
         )
 
